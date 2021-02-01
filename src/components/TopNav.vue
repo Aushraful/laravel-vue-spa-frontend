@@ -44,21 +44,23 @@
                         v-bind="attrs"
                         v-on="on"
                 >
-                    <v-icon>mdi-shield-account</v-icon> <span>Account</span>
+                    <v-icon>mdi-shield-account</v-icon> <span>{{ authenticated ? user.email : "Account" }}</span>
                 </v-btn>
             </template>
-            <v-list>
+            <v-list v-if="authenticated">
+                <v-list-item link class=" pl-2" to="/profile">
+                    <v-list-item-title list-item-title-font-size><v-icon left small>mdi-account-circle-outline</v-icon> Profile</v-list-item-title>
+                </v-list-item>
+                <v-list-item link class=" pl-2" @click.prevent="signOut">
+                    <v-list-item-title list-item-title-font-size><v-icon left small>mdi-logout</v-icon> Sign Out</v-list-item-title>
+                </v-list-item>
+            </v-list>
+            <v-list v-else>
                 <v-list-item link class=" pl-2" to="/sign-up">
                     <v-list-item-title list-item-title-font-size><v-icon left small>mdi-account-plus-outline</v-icon> Sign Up</v-list-item-title>
                 </v-list-item>
                 <v-list-item link class=" pl-2" to="/sign-in">
                     <v-list-item-title list-item-title-font-size><v-icon left small>mdi-login</v-icon> Sign In</v-list-item-title>
-                </v-list-item>
-                <v-list-item link class=" pl-2" to="/profile">
-                    <v-list-item-title list-item-title-font-size><v-icon left small>mdi-account-circle-outline</v-icon> Profile</v-list-item-title>
-                </v-list-item>
-                <v-list-item link class=" pl-2" to="/sign-out">
-                    <v-list-item-title list-item-title-font-size><v-icon left small>mdi-logout</v-icon> Sign Out</v-list-item-title>
                 </v-list-item>
             </v-list>
         </v-menu>
@@ -74,8 +76,32 @@
 </template>
 
 <script>
+    import { mapGetters, mapActions } from 'vuex'
+
     export default {
-        name: "Nav"
+        name: "Nav",
+        computed: {
+            ...mapGetters({
+                authenticated: 'auth/authenticated',
+                user: 'auth/user',
+            })
+        },
+        methods: {
+            ...mapActions({
+                signOutAction: 'auth/signOut'
+            }),
+
+            signOut () {
+                this.signOutAction().then(() => {
+                    this.$router.replace({
+                        name: 'Home'
+                    })
+                    this.$toasted.show('Signed Out Successfully!', {
+                        type: 'success',
+                    })
+                })
+            }
+        }
     }
 </script>
 

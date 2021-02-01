@@ -65,7 +65,8 @@
 </template>
 
 <script>
-    import axios from 'axios';
+
+    import {mapActions} from "vuex";
 
     export default {
         name: "SignIn",
@@ -94,19 +95,36 @@
             validate () {
                 this.$refs.form.validate()
             },
+
             reset () {
                 this.$refs.form.reset()
             },
 
-            async submitSignIn (/*{ errors, $auth, $toast }*/) {
+            ...mapActions({
+                signIn: 'auth/signIn'
+            }),
+
+            submitSignIn () {
                 if (this.$refs.form.validate()) {
 
-                    let response = axios.post('http://127.0.0.1:8000/api/auth/signin', this.form)
-                    console.log(response);
-
+                    this.signIn(this.form)
+                        .then(() => {
+                            this.$toasted.show('Signed In Successfully!', {
+                                // duration: 3000,
+                                type: 'success',
+                            })
+                            this.$router.replace({
+                                name: 'Profile',
+                            })
+                        })
+                        .catch((e) => {
+                            // console.log(e.response.data.message)
+                            this.$toasted.show(e.response.data.message, {
+                                type: 'error',
+                            })
+                        })
                 }
             }
-
         }
     }
 </script>

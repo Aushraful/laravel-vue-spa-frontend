@@ -28,6 +28,8 @@
                                 persistent-hint
                                 :rules="nameRules"
                                 label="Name"
+                                :class="{ 'is-invalid': errors.name }"
+                                :error-messages="errors.name"
                         />
 
                         <v-text-field
@@ -36,6 +38,8 @@
                                 label="E-mail"
                                 hint="Required"
                                 persistent-hint
+                                :class="{ 'is-invalid': errors.email }"
+                                :error-messages="errors.email"
                         />
 
                         <v-text-field
@@ -49,6 +53,8 @@
                                 persistent-hint
                                 label="Password"
                                 @click:append="showPassword = !showPassword"
+                                :class="{ 'is-invalid': errors.password }"
+                                :error-messages="errors.password"
                         />
 
                         <v-text-field
@@ -62,6 +68,8 @@
                                 hint="At least 6 characters"
                                 persistent-hint
                                 @click:append="showConfirmPassword = !showConfirmPassword"
+                                :class="{ 'is-invalid': errors.confirmPassword }"
+                                :error-messages="errors.confirmPassword"
                         />
 
                         <v-checkbox
@@ -86,7 +94,7 @@
                                 :disabled="!form"
                                 color="success"
                                 class="mr-4"
-                                @click.prevent="submitSignUpForm"
+                                @click.prevent="submitSignUp"
                         >
                             Sign Up
                         </v-btn>
@@ -98,6 +106,8 @@
 </template>
 
 <script>
+    import {mapActions} from "vuex";
+
     export default {
         name: "SignUp",
         data () {
@@ -108,6 +118,7 @@
                     password: '',
                     confirmPassword: ''
                 },
+                errors: [],
                 valid: false,
                 showPassword: false,
                 showConfirmPassword: false,
@@ -143,9 +154,33 @@
             reset () {
                 this.$refs.form.reset()
             },
-            async submitSignUpForm () {
+
+            ...mapActions({
+                signUp: 'auth/signUp'
+            }),
+
+            submitSignUp () {
                 if (this.$refs.form.validate()) {
-                    //
+
+                    this.signUp(this.form)
+                        .then(() => {
+                            this.$toasted.show('Signed Up Successfully!', {
+                                // duration: 3000,
+                                type: 'success',
+                            })
+                            this.$router.replace({
+                                name: 'Profile',
+                            })
+                        })
+                        .catch((e) => {
+                            // console.log(e.response.data.errors.email)
+
+                            this.errors=e.response.data.errors;
+
+                            this.$toasted.show('Please fill out the form properly!', {
+                                type: 'error',
+                            })
+                        })
                 }
             }
         }
